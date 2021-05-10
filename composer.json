@@ -1,0 +1,46 @@
+{
+  "name": "mediamotionag/contao-image-usage-bundle",
+  "homepage": "https://github.com/mediamotionag/contao-image-usage-bundle",
+  "description":"Index the usage of images (and downloads) based on the frontend",
+  "keywords":["index", "usage", "contao-bundle", "image", "images", "pdfs", "downloads", "nocache"],
+  "type": "contao-bundle",
+  "license": "LGPL-3.0+",
+  "authors": [
+    {
+      "name": "Media Motion AG",
+      "homepage": "https://www.mediamotion.ch/",
+      "role": "Developer"
+    }
+  ],
+  "support":{
+    "email":"ticket@memo.support",
+    "issues":"https://github.com/mediamotionag/contao-image-usage-bundle/issues",
+    "source":"https://github.com/mediamotionag/contao-image-usage-bundle"
+  },
+  "require": {
+    "php": ">=7.3.0",
+    "contao/core-bundle": "^4.9"
+  },
+  "require-dev": {
+    "contao/manager-plugin": "^2.0"
+  },
+  "conflict": {
+    "contao/manager-plugin": "<2.0 || >=3.0"
+  },
+  "extra": {
+    "contao-manager-plugin": "Memo\\DevBundle\\ContaoManager\\Plugin"
+  },
+  "autoload": {
+    "psr-4": {
+      "Memo\\DevBundle\\": "src/"
+    },
+    "classmap": [
+      "src/Resources/contao/"
+    ],
+    "exclude-from-classmap": [
+      "src/Resources/contao/config/",
+      "src/Resources/contao/dca/",
+      "src/Resources/contao/languages/"
+    ]
+  }
+}

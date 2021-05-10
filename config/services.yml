@@ -1,0 +1,4 @@
+services:
+    Memo\ImageUsageBundle\Indexer\ImageUsageIndexer:
+        tags:
+          - { name: 'contao.search_indexer' }
