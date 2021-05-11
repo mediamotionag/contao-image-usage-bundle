@@ -28,11 +28,11 @@
     "contao/manager-plugin": "<2.0 || >=3.0"
   },
   "extra": {
-    "contao-manager-plugin": "Memo\\DevBundle\\ContaoManager\\Plugin"
+    "contao-manager-plugin": "Memo\\ImageUsageBundle\\ContaoManager\\Plugin"
   },
   "autoload": {
     "psr-4": {
-      "Memo\\DevBundle\\": "src/"
+      "Memo\\ImageUsageBundle\\": "src/"
     },
     "classmap": [
       "src/Resources/contao/"
