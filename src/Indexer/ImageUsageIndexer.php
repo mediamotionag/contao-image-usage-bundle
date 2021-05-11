@@ -10,6 +10,8 @@ namespace Memo\ImageUsageBundle\Indexer;
 
 use Contao\CoreBundle\Search\Indexer\IndexerInterface;
 use Contao\CoreBundle\Search\Document;
+use Psr\Log\LogLevel;
+		use Contao\CoreBundle\Monolog\ContaoContext;
 
 class ImageUsageIndexer implements IndexerInterface
 {
@@ -27,7 +29,12 @@ class ImageUsageIndexer implements IndexerInterface
 
 	public function index(Document $document): void
 	{
-		die('<pre>'.print_r($document, true) .'</pre>');
+	
+		\System::getContainer()
+		      ->get('monolog.logger.contao')
+		      ->log(LogLevel::INFO, 'index action', array(
+		      'contao' => new ContaoContext(__CLASS__.'::'.__FUNCTION__, TL_GENERAL
+		      )));
 
 		foreach ($this->indexers as $indexer) {
 			$indexer->index($document);
