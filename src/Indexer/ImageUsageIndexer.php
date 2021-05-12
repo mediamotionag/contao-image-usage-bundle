@@ -28,17 +28,30 @@ class ImageUsageIndexer implements IndexerInterface
 	}
 
 	public function index(Document $document): void
-	{
-	
-		\System::getContainer()
-		      ->get('monolog.logger.contao')
-		      ->log(LogLevel::INFO, 'index action', array(
-		      'contao' => new ContaoContext(__CLASS__.'::'.__FUNCTION__, TL_GENERAL
-		      )));
-
-		foreach ($this->indexers as $indexer) {
-			$indexer->index($document);
+	{	
+		
+		// Get DOM/HTML
+		$dom = new \DOMDocument;
+		$dom->loadHTML($document->getBody());
+		
+		// Get all Links
+		$arrLinks = array();
+		foreach($dom->getElementsByTagName('a') as $node){
+			$arrLinks[] = $dom->saveHTML($node);
 		}
+		
+		// Get all Images
+		foreach($dom->getElementsByTagName('img') as $node){
+			$strImageTag = $dom->saveHTML($node);
+			preg_match('/src="(.*?)"/', $strImageTag, $arrImage);
+			$strImagePath = $arrImage[1];
+			if($objImage = \FilesModel::findByPath($strImagePath)){
+				$objImage->inuse = 1;
+				$objImage->save();
+			}
+			
+		}
+		
 	}
 
 	public function delete(Document $document): void

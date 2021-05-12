@@ -10,6 +10,6 @@ namespace Memo\ImageUsageBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class ImageUsageBundle extends Bundle
+class MemoImageUsageBundle extends Bundle
 {
 }

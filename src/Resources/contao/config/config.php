@@ -26,3 +26,4 @@
 /**
  * HOOKS
  */
+$GLOBALS['TL_HOOKS']['getSearchablePages'][] = array('mod_imageusage.hook_listener', 'emptySearchIndexPreUsageCheck');

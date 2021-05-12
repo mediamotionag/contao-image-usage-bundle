@@ -9,7 +9,9 @@ services:
                 - ["setFramework", ["@contao.framework"]]
         Symfony\Component\DependencyInjection\ContainerAwareInterface:
             calls:
-                - ["setContainer", ["@service_container"]] 
+                - ["setContainer", ["@service_container"]]
+    mod_imageusage.hook_listener:
+        class: Memo\ImageUsageBundle\Service\HookListener
     Memo\ImageUsageBundle\Indexer\ImageUsageIndexer:
         tags:
           - { name: 'contao.search_indexer' }

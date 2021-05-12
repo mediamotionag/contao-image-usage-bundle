@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Contao\ManagerPlugin\Config\ContainerBuilder as PluginContainerBuilder;
 use Contao\ManagerPlugin\Routing\RoutingPluginInterface;
-use Memo\ImageUsageBundle\ImageUsageBundle;
+use Memo\ImageUsageBundle\MemoImageUsageBundle;
 
 class Plugin implements BundlePluginInterface
 {
@@ -25,7 +25,7 @@ class Plugin implements BundlePluginInterface
 	public function getBundles(ParserInterface $parser)
 	{
 		return [
-			BundleConfig::create(ImageUsageBundle::class)->setLoadAfter([ContaoCoreBundle::class])
+			BundleConfig::create(MemoImageUsageBundle::class)->setLoadAfter([ContaoCoreBundle::class])
 		];
 	}
 }
