@@ -36,16 +36,16 @@ The second part of the bundle involves adding more logic to the contao search-in
 Meaning, while crawling the pages, this bundle looks for following information per page:  
 
 ### Links & Downloads
-Source: href-attribute of all a tags
+Source: href-attribute of all a tags  
 Data: Direct url to file or download-urls via get-parameter "file"  
 
 ### Images
-Source: src-attribute of all img tags
+Source: src-attribute of all img tags  
 Data: Direct url to file or url to asset associated with a file (via the tracking)  
 
 
 ### CSS-files
-Source: href-attribute of all link tags
+Source: href-attribute of all link tags  
 Data: css-files are scanned for url() statements, like for background-image: url(xyz.png) or font-face src  
 
 ## Screenshot
