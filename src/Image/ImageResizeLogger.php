@@ -19,50 +19,30 @@ use Contao\Image\ResizeOptions;
 use Imagine\Image\ImagineInterface;
 use Contao\Image\ImageDimensions;
 use Contao\Image\ImportantPart;
+use Contao\Image\DeferredResizerInterface;
 
-
-class ImageResizeLogger implements FrameworkAwareInterface
+class ImageResizeLogger implements DeferredResizerInterface
 {
    private $parent;
 
     public function __construct(
-        FrameworkAwareInterface $parent
+        DeferredResizerInterface $parent
     ) {
         $this->parent = $parent;
     }
     
-    public function resize(ImageInterface $image, ResizeConfiguration $config, ResizeOptions $options)
+    public function resize(ImageInterface $image, ResizeConfiguration $config, ResizeOptions $options): ImageInterface
     {
         $this->parent->resize($image, $config, $options);
     }
     
-    public function resizeDeferredImage(DeferredImageInterface $image, bool $blocking = true)
+    public function getDeferredImage(string $targetPath, ImagineInterface $imagine): ?DeferredImageInterface
+    {
+        $this->parent->getDeferredImage($targetPath, $imagine);
+    }
+    
+    public function resizeDeferredImage(DeferredImageInterface $image, bool $blocking = true): ?ImageInterface
     {
         $this->parent->resizeDeferredImage($image, $blocking);
-    }
-    
-    protected function executeResize(ImageInterface $image, ResizeCoordinates $coordinates, string $path, ResizeOptions $options)
-    {
-        $this->parent->executeResize($image, $coordinates, $path, $options);
-    }
-    
-    private function hasExecuteResizeHook()
-    {
-        $this->parent->hasExecuteResizeHook();
-    }
-    
-    private function hasGetImageHook()
-    {
-        $this->parent->hasGetImageHook();
-    }
-    
-    private function enhanceImagineException(ImagineRuntimeException $exception, ImageInterface $image)
-    {
-        $this->parent->enhanceImagineException($exception, $image);
-    }
-    
-    private function formatIsSupported(string $format, ImagineInterface $imagine)
-    {
-        $this->parent->formatIsSupported($format, $imagine);
     }
 } 
