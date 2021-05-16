@@ -32,7 +32,6 @@ $GLOBALS['TL_MODELS']['tl_assets']          = 'Memo\ImageUsageBundle\Model\Asset
 /**
  * HOOKS
  */
-$GLOBALS['TL_HOOKS']['getImage'][] = array('Memo\ImageUsageBundle\Service\HookListener', 'logImageResizes');
 
 /**
  * Manual Hook
