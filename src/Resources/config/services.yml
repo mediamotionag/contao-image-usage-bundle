@@ -1,17 +1,9 @@
 services:
-    _defaults:
-        autowire: true
-        autoconfigure: true
-        public: false
-    _instanceof:
-        Contao\CoreBundle\Framework\FrameworkAwareInterface:
-            calls:
-                - ["setFramework", ["@contao.framework"]]
-        Symfony\Component\DependencyInjection\ContainerAwareInterface:
-            calls:
-                - ["setContainer", ["@service_container"]]
-    mod_imageusage.hook_listener:
-        class: Memo\ImageUsageBundle\Service\HookListener
     Memo\ImageUsageBundle\Indexer\ImageUsageIndexer:
         tags:
           - { name: 'contao.search_indexer' }
+    memo.image.resizer:
+        class: Memo\ImageUsageBundle\Image\ImageResizeLogger
+        decorates: contao.image.resizer
+        arguments: ['@memo.image.resizer.inner']
+        public: true

@@ -14,16 +14,40 @@
 /**
  * Add back end modules
  */
+array_insert($GLOBALS['BE_MOD']['system'], 1, array
+(
+    'assets' => array
+    (
+        'tables'       => array('tl_assets'),
+    ),
 
-/**
- * Add front end modules
- */
+));
 
 /**
  * Models
  */
+$GLOBALS['TL_MODELS']['tl_assets']          = 'Memo\ImageUsageBundle\Model\AssetsModel';
+
 
 /**
  * HOOKS
  */
-$GLOBALS['TL_HOOKS']['getSearchablePages'][] = array('mod_imageusage.hook_listener', 'emptySearchIndexPreUsageCheck');
+$GLOBALS['TL_HOOKS']['getImage'][] = array('Memo\ImageUsageBundle\Service\HookListener', 'logImageResizes');
+
+/**
+ * Manual Hook
+ */
+if($_GET['do'] == 'maintenance'){
+	
+	if(is_array($_POST['purge']['folders'])){
+
+		if(in_array('images', $_POST['purge']['folders'])){
+			
+			// Purge tl_assets
+			$objDatabase = \Database::getInstance();
+			$objDatabase->prepare("TRUNCATE TABLE `tl_assets`;")->execute();
+			
+		}
+
+	}
+}

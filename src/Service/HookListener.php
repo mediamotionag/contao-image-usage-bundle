@@ -8,23 +8,42 @@
 
 namespace Memo\ImageUsageBundle\Service;
 
-use Contao\Controller;
-use Psr\Log\LogLevel;
-use Contao\CoreBundle\Monolog\ContaoContext;
-		
+use Contao\Image;
+use Contao\File;
+use Memo\ImageUsageBundle\Model\AssetsModel;
+
 class HookListener
-{	
-	
-	public function emptySearchIndexPreUsageCheck($arrPages, $intRoot, $isSitemap=false)
+{
+
+	public function logImageResizes(string $originalPath, int $width, int $height, string $mode, string $cacheName, File $file, string $targetPath, Image $imageObject)
 	{
-		if(!$isSitemap){
+		dump($file);
+		dump($mode);
+		dump($imageObject);
+		dump($targetPath);
+		
+		if($cacheName != '' && $file){
 			
-			$objDatabase = \Database::getInstance();
-			$objDatabase->prepare("UPDATE tl_files SET inuse=0 WHERE 1")->execute();
-			
+			if($objOriginal = \FilesModel::findByPath($originalPath)){
+
+				if(!$objAsset = AssetsModel::findBy(array('file=?', 'asset=?'), array($objOriginal->uuid, $cacheName))){
+					
+					$objAsset = new AssetsModel();
+					$objAsset->file = $objOriginal->uuid;
+					$objAsset->file_id = $objOriginal->id;
+					$objAsset->name = $objOriginal->name;
+					$objAsset->width = $width;
+					$objAsset->height = $height;
+					$objAsset->asset = $cacheName;
+					$objAsset->tstamp = time();
+					$objAsset->save();
+					
+				}
+				
+			}
 		}
 		
-		return $arrPages;
+		return false;
 	}
-}
 
+}
