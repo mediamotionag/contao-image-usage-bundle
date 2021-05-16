@@ -21,10 +21,13 @@ class ImageUsageIndexer implements IndexerInterface
 	 * @var array<IndexerInterface>
 	 */
 	private $indexers = [];
-	private static $hasRunOnce = false;
-	public $runs = 0;
 	public $filelist = [];
 	private $framework;
+	private static $hasRunOnce = false;
+	public $runs = 0;
+	public $linklist = [];
+	public $imagelist = [];
+	public $scriptlist = [];
 	
 	function __construct(ContaoFramework $framework) {
 		
@@ -57,34 +60,39 @@ class ImageUsageIndexer implements IndexerInterface
 		libxml_clear_errors();
 		
 		// Get all Links
-		$arrLinks = array();
 		foreach($dom->getElementsByTagName('a') as $node){
 			
 			$strLinkTag = $dom->saveHTML($node);
-			preg_match('/href="(.*?)"/', $strLinkTag, $arrLink);
+			preg_match('/href="(.*?)"/i', $strLinkTag, $arrLink);
 			$strURL = $arrLink[1];
 			$arrURL = parse_url($strURL);
 			parse_str($arrURL['query'], $arrParameters);
 			
-			// Download?
-			if($arrParameters['file'] != ''){
+			// Only check a link once (less DB-calls)
+			if(!in_array($arrParameters['file'], $this->linklist)){
 				
-				if($objFile = \FilesModel::findByPath($arrParameters['file'])){
+				// Download?
+				if($arrParameters['file'] != ''){
 					
-					$objFile->inuse = 1;
-					$objFile->save();
+					if($objFile = \FilesModel::findByPath($arrParameters['file'])){
+						
+						$objFile->inuse = 1;
+						$objFile->save();
+						
+					}
+					
+				} elseif($arrParameters['path'] != '' && $arrParameters['path'] != '#' && $arrParameters['path'] != '/') {
+					
+					if($objFile = \FilesModel::findByPath($arrParameters['path'])){
+						
+						$objFile->inuse = 1;
+						$objFile->save();
+						
+					}
 					
 				}
 				
-			} elseif($arrParameters['path'] != '' && $arrParameters['path'] != '#' && $arrParameters['path'] != '/') {
-				
-				if($objFile = \FilesModel::findByPath($arrParameters['path'])){
-					
-					$objFile->inuse = 1;
-					$objFile->save();
-					
-				}
-				
+				$this->linklist[] = $arrParameters['file'];
 			}
 		}
 		
@@ -92,26 +100,142 @@ class ImageUsageIndexer implements IndexerInterface
 		foreach($dom->getElementsByTagName('img') as $node){
 			
 			$strImageTag = $dom->saveHTML($node);
-			preg_match('/src="(.*?)"/', $strImageTag, $arrImage);
+			preg_match('/src="(.*?)"/i', $strImageTag, $arrImage);
 			$strImagePath = $arrImage[1];
 			
-			if($objImage = \FilesModel::findByPath($strImagePath)){
+			// Only check a image once (less DB-calls)
+			if(!in_array($strImagePath, $this->imagelist)){
 				
-				$objImage->inuse = 1;
-				$objImage->save();
-				
-			} elseif($objAsset = AssetsModel::findBy(array('asset=?'), array($strImagePath))){
-				
-				if($objImage = \FilesModel::findByUuid($objAsset->file)){
+				if($objImage = \FilesModel::findByPath($strImagePath)){
 					
 					$objImage->inuse = 1;
 					$objImage->save();
 					
+				} elseif($objAsset = AssetsModel::findBy(array('asset=?'), array($strImagePath))){
+					
+					if($objImage = \FilesModel::findByUuid($objAsset->file)){
+						
+						$objImage->inuse = 1;
+						$objImage->save();
+						
+					}
 				}
-			} else {
-				die('<pre>'.print_r($strImagePath, true) .'</pre>');
+				
+				$this->imagelist[] = $strImagePath;
+			}
+		}
+		
+		// Get all CSS Files (for background-images, etc.)
+		foreach($dom->getElementsByTagName('link') as $node){
+			
+			$strLinkTag = $dom->saveHTML($node);
+			preg_match('/href="(.*?)"/i', $strLinkTag, $arrCSS);
+			$strURL = $arrCSS[1];
+			$arrBaseURI = parse_url($node->baseURI);
+
+			$strRootPath = __DIR__;
+			$strRootPath = str_replace('/src/Memo/contao-image-usage-bundle/src/Indexer', '', $strRootPath);
+			$strRootPath = str_replace('/vendor/mediamotionag/contao-image-usage-bundle/src/Indexer', '', $strRootPath);
+			$strRootPath .= '/';
+			
+			// Absolute urls (but local)
+			if(stristr($strURL, $arrBaseURI['host'])){
+				
+				$strAbsoluteURL = $strURL;
+				
+			// External urls
+			} elseif(stristr($strURL, '://')){
+				
+				$strAbsoluteURL = false;
+			
+			// Relative URL (local)
+			} else{
+				
+				$strAbsoluteURL = $node->baseURI . ltrim($strURL, '/');
+				
 			}
 			
+			// Is it a local url?
+			if($strAbsoluteURL){
+				
+				if(!in_array($strAbsoluteURL, $this->filelist)){
+				
+					// Check css-files
+					if(stristr($strAbsoluteURL, '.css')){
+					
+						// Get css-content
+						$cURLConnection = curl_init();
+						curl_setopt($cURLConnection, CURLOPT_URL, $strAbsoluteURL);
+						curl_setopt($cURLConnection, CURLOPT_RETURNTRANSFER, true);
+						$strCSS = curl_exec($cURLConnection);
+						curl_close($cURLConnection);
+						
+						// Look for sources
+						preg_match_all('/url\(.*?\)/i', $strCSS, $arrURLs);
+						
+						if(is_array($arrURLs) && count($arrURLs) > 0 && count($arrURLs[0]) > 0){
+
+							foreach($arrURLs[0] as $strSource){
+								$strSource = ltrim($strSource, 'url(');
+								$strSource = rtrim($strSource, ')');
+								$strSource = str_replace(['"',"'"], "", $strSource);
+								$strSource = ltrim($strSource, './');
+								$arrSource = parse_url($strSource);
+								
+								$strSourcePath = $arrSource['path'];
+								
+								// Does the file exist?
+								if(file_exists($strSourcePath)){
+									
+									$strRealSourcePath = realpath($strSourcePath);
+									$strRealSourcePath = str_replace($strRootPath, '', $strRealSourcePath );
+									
+									if($objImage = \FilesModel::findByPath($strRealSourcePath)){
+						
+										$objImage->inuse = 1;
+										$objImage->save();
+										
+									} elseif($objAsset = AssetsModel::findBy(array('asset=?'), array($strRealSourcePath))){
+										
+										if($objImage = \FilesModel::findByUuid($objAsset->file)){
+											
+											$objImage->inuse = 1;
+											$objImage->save();
+											
+										}
+									}
+
+									
+									
+								}
+								
+							}
+							
+						}
+						
+					} else {
+					
+						$arrURL = parse_url($strAbsoluteURL);
+					
+						if($objImage = \FilesModel::findByPath($arrURL['path'])){
+							
+							$objImage->inuse = 1;
+							$objImage->save();
+							
+						} elseif($objAsset = AssetsModel::findBy(array('asset=?'), array($arrURL['path']))){
+							
+							if($objImage = \FilesModel::findByUuid($objAsset->file)){
+								
+								$objImage->inuse = 1;
+								$objImage->save();
+								
+							}
+						}
+					}
+					
+					$this->filelist[] = $strAbsoluteURL;
+				}
+			}
 		}
 		
 		// Count up Counter
