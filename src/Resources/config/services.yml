@@ -18,3 +18,6 @@ services:
         decorates: contao.image.resizer
         arguments: ['@memo.image.resizer.inner']
         public: true
+    memo.imageusage.toolbox:
+        class: Memo\ImageUsageBundle\Service\Toolbox
+        public: true

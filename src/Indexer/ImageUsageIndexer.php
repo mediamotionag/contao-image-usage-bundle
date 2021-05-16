@@ -53,6 +53,11 @@ class ImageUsageIndexer implements IndexerInterface
 			
 		}
 		
+		// General information
+		$arrBaseURI = parse_url($node->baseURI);
+		$objToolboxService = \System::getContainer()->get('memo.imageusage.toolbox');
+		$strRealSourcePath = $objToolboxService->getRootPath();
+		
 		// Get DOM/HTML of indexable page
 		libxml_use_internal_errors(true);
 		$dom = new \DOMDocument;
@@ -131,12 +136,6 @@ class ImageUsageIndexer implements IndexerInterface
 			$strLinkTag = $dom->saveHTML($node);
 			preg_match('/href="(.*?)"/i', $strLinkTag, $arrCSS);
 			$strURL = $arrCSS[1];
-			$arrBaseURI = parse_url($node->baseURI);
-
-			$strRootPath = __DIR__;
-			$strRootPath = str_replace('/src/Memo/contao-image-usage-bundle/src/Indexer', '', $strRootPath);
-			$strRootPath = str_replace('/vendor/mediamotionag/contao-image-usage-bundle/src/Indexer', '', $strRootPath);
-			$strRootPath .= '/';
 			
 			// Absolute urls (but local)
 			if(stristr($strURL, $arrBaseURI['host'])){
