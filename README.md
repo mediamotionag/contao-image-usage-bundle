@@ -30,23 +30,23 @@ composer require mediamotionag/contao-image-usage-bundle
 
 ## How it works
 The first part of this bundle is, tracking the generation of assets (images-sizes and webp).
-All generated assets (since last cache clear) are listed under "System > Assets".
+All generated assets (since last cache clear) are listed under "System > Assets".  
 
 The second part of the bundle involves adding more logic to the contao search-index crawler (Contao 4.9+).
-Meaning, while crawling the pages, this bundle looks for following information per page:
+Meaning, while crawling the pages, this bundle looks for following information per page:  
 
-**Links & Downloads**
+### Links & Downloads
 Source: href-attribute of all a tags
-Data: Direct url to file or download-urls via get-parameter "file"
+Data: Direct url to file or download-urls via get-parameter "file"  
 
-**Images**
+### Images
 Source: src-attribute of all img tags
-Data: Direct url to file or url to asset associated with a file (via the tracking)
+Data: Direct url to file or url to asset associated with a file (via the tracking)  
 
 
-**CSS-files**
+### CSS-files
 Source: href-attribute of all link tags
-Data: css-files are scanned for url() statements, like for background-image: url(xyz.png) or font-face src
+Data: css-files are scanned for url() statements, like for background-image: url(xyz.png) or font-face src  
 
 ## Screenshot
 File-Manager (Icon):  
